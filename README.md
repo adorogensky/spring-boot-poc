@@ -1,1 +1,1 @@
-# spring-boot-poc
+# Spring Boot Training
