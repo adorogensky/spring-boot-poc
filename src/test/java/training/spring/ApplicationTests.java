@@ -22,7 +22,18 @@ public class ApplicationTests {
         ).andExpect(
             status().isOk()
         ).andExpect(
-            content().string("Hello!")
+            content().string("Hello World!")
+        );
+    }
+
+    @Test
+    void rootEndpointWithWhoEqualsAlexReturnsHelloAlex() throws Exception {
+        mockMvc.perform(
+            get("/").queryParam("who", "Alex")
+        ).andExpect(
+            status().isOk()
+        ).andExpect(
+            content().string("Hello Alex!")
         );
     }
 }

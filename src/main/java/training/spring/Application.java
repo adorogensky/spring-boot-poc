@@ -3,6 +3,7 @@ package training.spring;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
@@ -14,8 +15,8 @@ public class Application {
 	}
 
 	@GetMapping
-	public String hello() {
-		return "Hello!";
+	public String hello(@RequestParam(value = "who", defaultValue = "World") String who) {
+		return String.format("Hello %s!", who);
 	}
 
 }
