@@ -1,0 +1,1 @@
+ - change whitelabel error page when exception is thrown

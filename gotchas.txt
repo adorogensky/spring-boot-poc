@@ -1,0 +1,2 @@
+ - Spring will by default require @RequestParam params, if no param is passed and no default value is set
+   MissingServletRequestParameterException will be thrown (handled in DefaultHandlerExceptionResolver)
