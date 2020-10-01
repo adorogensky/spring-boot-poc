@@ -58,7 +58,7 @@ public class Application extends WebSecurityConfigurerAdapter {
 		}
 
 		UserDetails user = userDetailsService.loadUserByUsername(authenticateRequest.getUser());
-		return ResponseEntity.ok(IdToken.of(user));
+ 		return ResponseEntity.ok(IdToken.of(user).toString());
 	}
 
 	@Override
