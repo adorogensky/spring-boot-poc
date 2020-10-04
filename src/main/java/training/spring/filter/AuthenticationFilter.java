@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,13 +38,14 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("AuthenticationFilter.doFilterInternal()");
-        if (!AUTHENTICATE_REQUEST_URI.equals(request.getRequestURI())) {
+        if (AUTHENTICATE_REQUEST_URI.equals(request.getRequestURI())) {
             filterChain.doFilter(request, response);
+            return;
         }
 
         String authHeader = request.getHeader(AUTHORIZATION_HEADER_NAME);
         if (authHeader == null || !authHeader.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authorization header is missing");
+            returnForbidden(response, "Authorization header is missing");
             return;
         }
 
@@ -53,19 +55,19 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 authHeader.substring(AUTHORIZATION_HEADER_PREFIX.length())
             ).getUser();
         } catch (JwtException ex) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid");
+            returnForbidden(response, "Access token is invalid");
             return;
         }
 
         if (authHeaderUser == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid");
+            returnForbidden(response, "Access token is invalid");
             return;
         }
 
         UserDetails user = userDetailsService.loadUserByUsername(authHeaderUser);
 
         if (user == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Access token is invalid");
+            returnForbidden(response, "Access token is invalid");
             return;
         }
 
@@ -78,5 +80,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void returnForbidden(HttpServletResponse response, String msg) throws IOException {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+        response.getWriter().write(msg);
+        response.getWriter().flush();
     }
 }

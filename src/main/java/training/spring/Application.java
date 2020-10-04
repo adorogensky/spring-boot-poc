@@ -13,16 +13,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.bind.annotation.*;
+import training.spring.filter.AuthenticationFilter;
 import training.spring.security.AuthenticateRequest;
 import training.spring.security.IdToken;
-
-import java.util.Collections;
 
 @SpringBootApplication
 @RestController
@@ -34,6 +34,9 @@ public class Application extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private UserDetailsService userDetailsService;
+
+	@Autowired
+	private AuthenticationFilter authenticationFilter;
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
@@ -69,7 +72,8 @@ public class Application extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable().authorizeRequests().antMatchers("/authenticate")
-				.permitAll().anyRequest().authenticated();
+				.permitAll().anyRequest().authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 	@Override
@@ -81,10 +85,5 @@ public class Application extends WebSecurityConfigurerAdapter {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance();
-	}
-
-	@Bean
-	public UserDetailsService userDetailsService() {
-		return userName -> new User(userName, "123", Collections.emptyList());
 	}
 }
